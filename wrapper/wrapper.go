@@ -105,6 +105,7 @@ func (w *Wrapper) Init() error {
 	w.allProtos = make([]string, len(w.ProtoFiles), len(w.ProtoFiles)+len(expanded))
 	copy(w.allProtos, w.ProtoFiles)
 	w.allProtos = append(w.allProtos, expanded...)
+	w.homogenizePathSeparators()
 	var err error
 	w.infos, err = GetFileInfos(w.ImportDirs, w.allProtos, w.ProtocCommand)
 	if err != nil {
@@ -143,6 +144,20 @@ func (w *Wrapper) Init() error {
 
 	w.initCalled = true
 	return nil
+}
+
+func (w *Wrapper) homogenizePathSeparators() {
+	if os.PathSeparator == '\\' {
+		for k, v := range w.allProtos {
+			w.allProtos[k] = strings.Replace(v, "\\", "/", -1)
+		}
+		for k, v := range w.ProtoFiles {
+			w.ProtoFiles[k] = strings.Replace(v, "\\", "/", -1)
+		}
+		for k, v := range w.ImportDirs {
+			w.ImportDirs[k] = strings.Replace(v, "\\", "/", -1)
+		}
+	}
 }
 
 // inImportDir returns true if the given file has a lexicographical
